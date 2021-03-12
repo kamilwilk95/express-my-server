@@ -4,7 +4,16 @@ const hbs = require('express-handlebars');
 // const fileUpload = require('express-fileupload');
 
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        /*Appending extension with original name*/
+        cb(null, file.originalname)
+    }
+})
+const upload = multer({ storage: storage });
 
 const app = express();
 
@@ -46,10 +55,10 @@ app.get('/hello/:name', (req, res) => {
 // rozwiązanie z wykorzystanie multera
 app.post('/contact/send-message', upload.single('image'), (req, res) => {
     const { author, sender, title, message } = req.body;
-    console.log('req.body',req.body);
-    console.log('req.file',req.file);
+    console.log('req.body', req.body);
+    console.log('req.file', req.file);
 
-    if(author && sender && title && message && req.file) {
+    if (author && sender && title && message && req.file) {
         res.render('contact', { isSent: true, fileName: req.file.originalname });
     }
     else {
@@ -80,14 +89,14 @@ app.post('/contact/send-message', upload.single('image'), (req, res) => {
 //     }
 // });
 
-app.use(function(err,req,res,next) {
-    res.render('error',{ layout: 'error' });
+app.use(function (err, req, res, next) {
+    res.render('error', { layout: 'error' });
 });
 
 app.use((req, res) => {
     res.status(404).send('404 not found...');
-  });
+});
 
 app.listen(8000, () => {
-  console.log('Server is running on port: 8000');
+    console.log('Server is running on port: 8000');
 });
